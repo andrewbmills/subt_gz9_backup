@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Spawn your team here. -->
+  <arg name="x1_name" default="X1" />
+
+  <!-- Spawn X1 -->
+  <include file="$(find x1_gazebo)/launch/spawn_x1.launch">
+    <arg name="robot_namespace" value="$(arg x1_name)"/>
+    <arg name="x" value="-2"/>
+    <arg name="y" value="1"/>
+    <arg name="z" value="0.1"/>
+    <arg name="yaw" value="0"/>
+  </include>
+
+  <!-- Competitor's control nodes -->
+  <node name="$(arg x1_name)_control" pkg="subt_example" type="subt_example_node" output="screen" args="$(arg x1_name) $(arg x1_name)" />
+
+</launch>

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Spawn your team here. -->
+  <arg name="x4_name" default="X4" />
+  <arg name="x0" default="-2"/>
+  <arg name="y0" default="-1"/>
+  <arg name="z0" default="0.1"/>
+
+  <!-- X4 quadcopter -->
+  <group ns="$(arg x4_name)">
+    <include file="$(find x4_description)/launch/spawn_x4.launch">
+      <arg name="mav_name" value="X4" />
+      <arg name="x" value="$(arg x0)"/>
+      <arg name="y" value="$(arg y0)"/>
+      <arg name="z" value="$(arg z0)"/>
+    </include>
+    <!-- Spawn a position controller -->
+    <node name="lee_position_controller_node" pkg="rotors_control" type="lee_position_controller_node">
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/lee_controller_neo11.yaml" />
+      <rosparam command="load" file="$(find rotors_gazebo)/resource/neo11.yaml" />
+      <remap from="odometry" to="odometry_sensor1/odometry" />
+    </node>
+    <!-- Give robot_descriptom parameter and joint states, publish TF frames -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="robot_state_publisher_fixed" pkg="robot_state_publisher" type="robot_state_publisher">
+        <remap from="joint_states" to="fixed/joint_states" />
+    </node>
+    <!-- Convert cmd_vel into pose command so as to provide the same interface -->
+    <node name="cmdvel_transform" pkg="subt_example" type="cmdvel_converter.py" args="/X4/odometry_sensor1/pose /X4/cmd_vel /X4/command/pose"/>
+  </group>
+
+  <!-- Competitor's control nodes -->
+  <node name="$(arg x4_name)_control" pkg="subt_example" type="subt_example_node" output="screen" args="$(arg x4_name) $(arg x4_name)" />
+
+  <!-- Teleop node -->
+  <!-- <arg name="joy_dev" default="/dev/input/js0" />
+  <include file="$(find subt_example)/launch/teleop.launch">
+    <arg name="joy_dev" default="$(arg joy_dev)" />
+    <arg name="robot_config" value="$(find subt_example)/config/robot_config.yaml"/>
+  </include> -->
+
+</launch>
